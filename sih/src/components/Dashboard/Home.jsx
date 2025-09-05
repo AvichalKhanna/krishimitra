@@ -87,7 +87,7 @@ export default function Home() {
     })),
   });
 
-
+  const messagesEndRef = useRef(null);
 
   const [expanded, setExpanded] = useState(false);
 
@@ -219,8 +219,14 @@ useEffect(() => {
   }, []);
 
   const pushUserMessage = (text) => {
-    setChatMessages((m) => [...m, { from: "user", text }]);
+    setChatMessages((prev) => [...prev, { from: "user", text }]);
+    setBotTyping(true);
+    setTimeout(() => {
+      botReply("Got it — thanks for sharing. (Mock reply)");
+      setBotTyping(false);
+    }, 1200);
   };
+
   const botReply = (text) => {
     setChatMessages((m) => [...m, { from: "bot", text }]);
   };
@@ -239,6 +245,13 @@ useEffect(() => {
       // already started
     }
   };
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, botTyping, chatOpen]);
+
 
   const stopListening = () => {
     recognitionRef.current?.stop();
@@ -565,7 +578,7 @@ useEffect(() => {
 
         </section>
 {/* Right column: Alerts, News, Chat quick access */}
-<aside className="flex flex-col gap-6">
+<aside className="flex flex-col gap-6 scrollbar-hide">
   {/* Alerts */}
   <Card className="p-4 rounded-2xl shadow-md bg-white">
     <div className="flex items-center justify-between">
@@ -725,7 +738,7 @@ useEffect(() => {
       {chatOpen && (
         <>
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 hide-scrollbar">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 scrollbar-hide">
             {chatMessages.map((m, i) => (
               <div
                 key={i}
@@ -758,7 +771,10 @@ useEffect(() => {
                 </div>
               </div>
             )}
+
+          <div ref={messagesEndRef} />
           </div>
+
 
           {/* Input area */}
           <div className="p-3 border-t flex items-center text-black placeholder:text-black gap-2 bg-white hide-scrollbar">
